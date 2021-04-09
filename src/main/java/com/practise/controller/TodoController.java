@@ -19,10 +19,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.practise.dto.TodoDto;
 import com.practise.model.Todo;
 import com.practise.repository.TodoRepository;
 import com.practise.services.TodoService;
 import com.practise.services.TodoServices;
+import com.practise.utils.Constants;
 
 @RestController	
 public class TodoController {
@@ -31,26 +33,26 @@ public class TodoController {
 	private TodoService todoService;
 	
 	
-	@GetMapping("/todos/")
-	public List<Todo> findAll()
+	@GetMapping(Constants.GET_ALL_TODOS)
+	public List<TodoDto> findAll()
 	{
 		return todoService.getAllTodos();
 	}
 	
 	
-	@GetMapping("/todos/{user}")
-	public List<Todo> getTodos(@PathVariable String user)
+	@GetMapping(Constants.GET_TODOS_BY_USER)
+	public List<TodoDto> getTodos(@PathVariable String user)
 	{
 		return todoService.getTodos(user);
 	}
 	
-	@GetMapping("/todos/{user}/{id}")
-	public Optional<Todo> getTodos(@PathVariable String user, @PathVariable int id)
+	@GetMapping(Constants.GET_TODO_BY_ID)
+	public TodoDto getTodoById(@PathVariable int id)
 	{
 		return todoService.getTodoById(id);
 	}
 	
-	@DeleteMapping("/todos/{user}/{id}")
+	@DeleteMapping(Constants.DELETE_TODO)
 	public ResponseEntity<Void> deleteTodo(@PathVariable String user, @PathVariable int id)
 	{
 		if ( todoService.getTodoById(id) != null)
@@ -61,20 +63,20 @@ public class TodoController {
 		return ResponseEntity.notFound().build(); 
 	}
 	
-	@PutMapping("/todos/{user}/{id}")
-	public ResponseEntity<Todo> updateTodo(@PathVariable String user, @PathVariable int id, @RequestBody Todo todo)
+	@PutMapping(Constants.UPDATE_TODO)
+	public ResponseEntity<TodoDto> updateTodo(@PathVariable String user, @PathVariable int id, @RequestBody TodoDto todoDto)
 	{
-		System.out.println(todo);
-		if (todoService.updateTodo(user,id,todo) != null)
+		System.out.println(todoDto);
+		if (todoService.updateTodo(user,id,todoDto) != null)
 		{
-			return new ResponseEntity<Todo>(todo, HttpStatus.OK);
+			return new ResponseEntity<TodoDto>(todoDto, HttpStatus.OK);
 		}
-		return new ResponseEntity<Todo>(todo, HttpStatus.METHOD_FAILURE);
+		return new ResponseEntity<TodoDto>(todoDto, HttpStatus.METHOD_FAILURE);
 	}
 	
-	@PostMapping("/todos/{user}")
-	public ResponseEntity<?> add(@PathVariable String user, @RequestBody Todo todo) {
-			Todo createdTodo = todoService.addTodo(user, todo.getDesc(), todo.getIsDone());
+	@PostMapping(Constants.SAVE_TODO)
+	public ResponseEntity<?> add(@PathVariable String user, @RequestBody TodoDto todoDto) {
+			Todo createdTodo = todoService.addTodo(todoDto);
 			if (createdTodo == null) {
 				return ResponseEntity.noContent().build();
 			}

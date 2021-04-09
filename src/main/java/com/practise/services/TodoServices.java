@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.SystemPropertyUtils;
 
+import com.practise.converter.TodoConverter;
+import com.practise.dto.TodoDto;
 import com.practise.model.Todo;
 import com.practise.repository.TodoRepository;
 
@@ -18,18 +21,18 @@ public class TodoServices implements TodoService {
 	@Autowired
 	private TodoRepository todoRepository;
 	
-	public Todo addTodo(String user, String desc, Boolean isDone)
+	public Todo addTodo(TodoDto todoDto)
 	{
 		
 		Todo todo = new Todo();
-		todo.setUser(user);
-		todo.setDesc(desc);
-		todo.setIsDone(isDone);
+		todo.setUser(todoDto.getUser());
+		todo.setDesc(todoDto.getDesc());
+		todo.setIsDone(todoDto.getIsDone());
 		todo.setDueBy(new Date());
 		return todoRepository.save(todo);
 	}
 	
-	public List<Todo> getTodos(String user)
+	public List<TodoDto> getTodos(String user)
 	{
 		List<Todo> filteredTodos = new ArrayList<Todo>();
 		
@@ -38,14 +41,13 @@ public class TodoServices implements TodoService {
 			if (todo.getuser().equals(user))
 				filteredTodos.add(todo);
 		}
-		return filteredTodos;
-		
+		return filteredTodos.stream().map(TodoConverter::entityToDto).collect(Collectors.toList());	
 	}
 	
-	public Optional<Todo> getTodoById(int id)
+	public TodoDto getTodoById(int id)
 	{
 		
-		return todoRepository.findById(id);
+		return TodoConverter.entityToDto(todoRepository.getOne(id));
 	}
 	
 	
@@ -55,21 +57,24 @@ public class TodoServices implements TodoService {
 		todoRepository.deleteById(id);
 	}
 	
-	public Todo updateTodo(String user,int id,Todo todo)
+	public Todo updateTodo(String user,int id,TodoDto todoDto)
 	{
-		if (todoRepository.findById(id) != null)
+		Todo todo = todoRepository.getOne(id);
+		if (todo != null)
 		{	
 			todo.setId(id);
-			todo.setUser(user);
+			todo.setUser(todoDto.getUser());
 			todo.setDueBy(new Date());
+			todo.setDesc(todoDto.getDesc());
+			todo.setIsDone(todoDto.getIsDone());
 			return todoRepository.save(todo);
 		}
 		return null;
 	}
 	
 	@Override
-	public List<Todo> getAllTodos() {
+	public List<TodoDto> getAllTodos() {
 		List < Todo > todoList = todoRepository.findAll();
-        return todoList;
+        return todoList.stream().map(TodoConverter::entityToDto).collect(Collectors.toList());
 	}
 }
