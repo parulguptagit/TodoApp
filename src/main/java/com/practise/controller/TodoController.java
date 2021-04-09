@@ -44,7 +44,7 @@ public class TodoController {
 		return todoService.getTodos(user);
 	}
 	
-	@GetMapping("/todos/{user}/{id}")
+	@GetMapping(value = "/todos/{user}/{id}", produces = {"application/json","application/xml"})
 	public Optional<Todo> getTodos(@PathVariable String user, @PathVariable int id)
 	{
 		return todoService.getTodoById(id);
